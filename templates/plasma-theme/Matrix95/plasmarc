@@ -1,0 +1,8 @@
+# Matrix 95 {{NAME}} Plasma style. Opaque pixel-art theme: no blur-behind, no
+# adaptive transparency, no FallbackTheme override (Plasma falls back to
+# "default" (Breeze) for every SVG this theme does not ship).
+[ContrastEffect]
+enabled=false
+
+[AdaptiveTransparency]
+enabled=false

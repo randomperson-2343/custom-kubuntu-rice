@@ -7,6 +7,20 @@ Three colors: **green**, **cyan** and **amber**. Switch any time with one comman
 
 ![Code rain in all three colors](docs/screenshots/rain-all.png)
 
+### Matrix 95
+
+| | |
+|---|---|
+| ![Login screen](docs/screenshots/login-green.png) | ![Startup splash](docs/screenshots/splash-amber.png) |
+| Login: a Windows 95 log-on dialog over live rain | Startup: the Matrix 95 boot screen |
+| ![Window frames](docs/screenshots/decoration-green.png) | ![Taskbar](docs/screenshots/taskbar-green.png) |
+| Window frames: bevels, solid title bars, `_ □ ×` | Taskbar: Start button, named task buttons, tray |
+
+![Buttons, checkboxes, scrollbars and menus](docs/screenshots/widgets-amber.png)
+
+Tune the rain's motion in your browser before installing: open
+`docs/motion/motion-lab.html` (or the published Motion Lab link).
+
 ## Install
 
 You need: Kubuntu 26.04 with the normal KDE Plasma desktop, an internet
@@ -97,6 +111,17 @@ login screen and terminal prompt. Backups stay in
 - **Battery:** the rain runs all the time, including during games (by
   design). Use `matrix-rice rain off` when you need the battery.
 
+## Known limits
+
+- Built and tested without a real KDE desktop (in a cloud container), so the
+  first run on your laptop is the real test. Expect a round of small fixes.
+- The Windows 95 pixel edges are sharpest at 100% or 200% display scaling.
+  At 125% or 150% they soften slightly.
+- KDE apps built with Kirigami (System Settings, Discover) draw many of their
+  own controls, so they only partly take the Windows 95 widget look.
+- The tray and clock area can't get the sunken Windows 95 well (Plasma gives
+  panel widgets no frame); everything else on the taskbar is themed.
+
 ## For developers
 
 - `tests/run-tests.sh` runs lint, template, contrast, QML render and a full
@@ -104,3 +129,5 @@ login screen and terminal prompt. Backups stay in
 - Colors live in `palettes/*.sh`; every config is a template in `templates/`
   with `{{PLACEHOLDERS}}` filled by `lib/common.sh`.
 - Design spec: `docs/superpowers/specs/2026-10-20-matrix-rice-design.md`.
+- `tools/` holds the generators for the Windows 95 SVG art (not installed).
+  Each theme folder's `NOTES.md` documents its KDE config keys.

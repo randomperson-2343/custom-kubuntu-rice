@@ -5,7 +5,7 @@
 MR_SPLASH_ID="com.github.matrixrice.splash"
 MR_WALLPAPER_DIR="$XDG_DATA_HOME/plasma/wallpapers/$MR_PLUGIN_ID"
 MR_SPLASH_DIR="$XDG_DATA_HOME/plasma/look-and-feel/$MR_SPLASH_ID"
-MR_START_ICON="$MR_DATA/icons/matrix95-start.svg"
+MR_ICONS="$MR_DATA/icons"
 MR_SDDM_DIR="${MR_SDDM_DIR:-/usr/share/sddm/themes/$MR_SDDM_THEME}"
 MR_PANEL_FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
 
@@ -112,10 +112,14 @@ install_variant_files() {
       render "$MR_SRC/templates/kvantum/Matrix95.kvconfig" "$kdir/Matrix95-$MR_NAME.kvconfig"
       render "$MR_SRC/templates/kvantum/Matrix95.svg" "$kdir/Matrix95-$MR_NAME.svg"
     fi
-    if [ -d "$MR_SRC/templates/plasma-theme" ]; then
+    if [ -d "$MR_SRC/templates/plasma-theme/Matrix95" ]; then
       local pdir="$XDG_DATA_HOME/plasma/desktoptheme/Matrix95-$MR_NAME"
       rm -rf "$pdir"
-      render_tree "$MR_SRC/templates/plasma-theme" "$pdir"
+      render_tree "$MR_SRC/templates/plasma-theme/Matrix95" "$pdir"
+    fi
+    # One Start button file per color: Plasma caches images by file name.
+    if [ -f "$MR_SRC/templates/icons/matrix95-start-button.svg" ]; then
+      render "$MR_SRC/templates/icons/matrix95-start-button.svg" "$MR_ICONS/matrix95-start-button-$MR_ID.svg"
     fi
   done
   ok "color schemes, terminal colors and Matrix 95 theme files for: ${MR_VARIANTS[*]}"
@@ -153,6 +157,7 @@ apply_fonts() {
 
 # ---------------------------------------------------------------- apply
 
+# shellcheck disable=SC2153 # MR_CONF comes from lib/common.sh
 apply_user_configs() {
   render "$MR_SRC/templates/konsole/Matrix.profile" "$XDG_DATA_HOME/konsole/Matrix.profile"
   set_key konsolerc "Desktop Entry" DefaultProfile Matrix.profile
@@ -160,9 +165,6 @@ apply_user_configs() {
   render "$MR_SRC/templates/starship.toml" "$XDG_CONFIG_HOME/starship.toml"
   render "$MR_SRC/templates/fastfetch/config.jsonc" "$XDG_CONFIG_HOME/fastfetch/config.jsonc"
   render "$MR_SRC/templates/fastfetch/matrix-logo.txt" "$XDG_CONFIG_HOME/fastfetch/matrix-logo.txt"
-  if [ -f "$MR_SRC/templates/icons/matrix95-start.svg" ]; then
-    render "$MR_SRC/templates/icons/matrix95-start.svg" "$MR_START_ICON"
-  fi
   if [ -f "$MR_SRC/templates/splash/Splash.qml" ] && [ -d "$MR_SPLASH_DIR" ]; then
     render "$MR_SRC/templates/splash/Splash.qml" "$MR_SPLASH_DIR/contents/splash/Splash.qml"
   fi
@@ -332,12 +334,30 @@ taskbar_on() {
       [ -f "$XDG_CONFIG_HOME/$f" ] && cp "$XDG_CONFIG_HOME/$f" "$orig/"
     done
   fi
-  [ -f "$MR_START_ICON" ] || render "$MR_SRC/templates/icons/matrix95-start.svg" "$MR_START_ICON" 2>/dev/null || true
+  local v icon
+  v=$(state_get COLOR)
+  icon="$MR_ICONS/matrix95-start-button-${v:-green}.svg"
   plasma_eval "panels().forEach(function (p) { if (p.location === 'bottom') p.remove(); });" >/dev/null
-  id=$(plasma_eval "$(sed "s|__START_ICON__|$MR_START_ICON|g" "$js")" | tr -dc '0-9\n' | tail -n 1)
+  id=$(plasma_eval "$(sed "s|__START_ICON__|$icon|g" "$js")" | tr -dc '0-9\n' | tail -n 1)
   state_set TASKBAR on
   state_set TASKBAR_PANEL "$id"
   ok "Windows 95 taskbar (old panel layout saved)"
+}
+
+# Points the Start button at the current color's image.
+recolor_start_button() {
+  [ "$(state_get TASKBAR)" = on ] || return 0
+  plasma_running || return 0
+  plasma_eval "
+panels().forEach(function (p) {
+  p.widgets('org.kde.plasma.kickoff').forEach(function (w) {
+    w.currentConfigGroup = ['General'];
+    if (String(w.readConfig('icon', '')).indexOf('matrix95-start-button') >= 0) {
+      w.writeConfig('icon', '$MR_ICONS/matrix95-start-button-$MR_ID.svg');
+      w.reloadConfig();
+    }
+  });
+});" >/dev/null
 }
 
 # Puts the panel layout from before `taskbar on` back.
@@ -429,7 +449,8 @@ apply_variant() {
   apply_lockscreen
   apply_wallpaper
   apply_splash
-  notify_kde
   state_set COLOR "$v"
+  recolor_start_button
+  notify_kde
   [ "$login" = --no-login ] || login_recolor
 }

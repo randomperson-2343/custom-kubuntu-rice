@@ -31,7 +31,7 @@ echo "== 2. templates"
     load_palette "$v"
     while IFS= read -r -d '' f; do
       rel=${f#"$ROOT"/templates/}
-      case "$f" in *NOTES.md|*.png) continue ;; esac
+      case "$f" in *NOTES.md|*.png|*/tools/*) continue ;; esac
       render "$f" "$WORK/render/$v/$rel" || exit 1
     done < <(find "$ROOT/templates" -type f -print0)
   done
@@ -74,7 +74,7 @@ bad = 0
 for f in sorted(pathlib.Path(sys.argv[1]).glob("*.sh")):
     v = dict(re.findall(r'MR_(\w+)="(#[0-9A-Fa-f]{6})"', f.read_text()))
     pairs = [("FG", "BG"), ("HEAD", "BG"), ("FG", "SURFACE"), ("FG", "FACE"), ("HEAD", "TITLE"),
-             ("DIM", "BG"), ("BG", "FG"), ("TITLE_INACTIVE_TEXT", "TITLE_INACTIVE")]
+             ("DIM", "BG"), ("BG", "FG"), ("TITLE_INACTIVE_TEXT", "TITLE_INACTIVE"), ("FG", "LIGHT")]
     for a, b in pairs:
         r = cr(v[a], v[b])
         if r < 4.5:
@@ -134,7 +134,7 @@ stub qdbus6 'echo "qdbus $1 $2 $3" >> "$LOG"; s="${4:-}"
 case "$s" in
   *"print(\"up\")"*) echo up ;;
   *"out.join"*) printf "org.kde.image\tfile:///usr/share/wallpapers/Next/\n" ;;
-  *"new Panel"*) echo "panel script" >> "$LOG"; echo 42 ;;
+  *"new Panel"*) echo "panel script: $(echo "$s" | grep -o "matrix95-start-button-[a-z]*")" >> "$LOG"; echo 42 ;;
   *wallpaperPlugin*) echo "wallpaper script: $(echo "$s" | grep -o "Ink: .#[0-9A-F]*.")" >> "$LOG" ;;
 esac'
 stub sudo '[ "${1:-}" = -v ] && exit 0; exec "$@"'
@@ -159,6 +159,9 @@ else
 fi
 D="$H/.local/share"
 check "color schemes installed for all 3 colors" test -f "$D/color-schemes/MatrixGreen.colors" -a -f "$D/color-schemes/MatrixCyan.colors" -a -f "$D/color-schemes/MatrixAmber.colors"
+check "Matrix 95 Plasma style installed (no dev tools inside)" test -f "$D/plasma/desktoptheme/Matrix95-Cyan/metadata.json" -a ! -e "$D/plasma/desktoptheme/Matrix95-Cyan/tools"
+check "Matrix 95 window frames installed" test -f "$D/aurorae/themes/Matrix95-Cyan/Matrix95-Cyanrc"
+check "Start button images for all colors" test -f "$D/matrix-rice/icons/matrix95-start-button-amber.svg"
 check "wallpaper plugin has the rain engine" test -f "$D/plasma/wallpapers/com.github.matrixrice.coderain/contents/ui/MatrixRain.qml"
 check "matrix-rice command linked" test -x "$H/.local/bin/matrix-rice"
 check "Cyan color scheme applied" grep -q "colorscheme MatrixCyan" "$LOG"
@@ -187,6 +190,7 @@ check "rain off reaches lock screen" test "$(kreadconfig5 --file "$H/.config/ksc
 if [ -f "$ROOT/plasma/layout/win95-taskbar.js" ]; then
   run "$H/.local/bin/matrix-rice" taskbar on > /dev/null 2>&1
   check "taskbar on stores the panel id" grep -q "TASKBAR_PANEL=42" "$H/.config/matrix-rice/state"
+  check "taskbar uses the amber Start button" grep -q "start-button-amber" "$LOG"
   printf 'changed by taskbar\n' >> "$H/.config/plasma-org.kde.plasma.desktop-appletsrc"
 fi
 

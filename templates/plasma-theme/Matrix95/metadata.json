@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "matrix-rice"
+            }
+        ],
+        "Category": "",
+        "Description": "Windows 95 taskbar, menus and tooltips in Matrix {{NAME}} colors",
+        "EnabledByDefault": true,
+        "Id": "Matrix95-{{NAME}}",
+        "License": "",
+        "Name": "Matrix 95 {{NAME}}",
+        "Version": "1.0",
+        "Website": ""
+    },
+    "X-Plasma-API": "5.0"
+}
