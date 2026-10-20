@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "matrix-rice"
+            }
+        ],
+        "Description": "Auto-tiles windows: one main window on the left, the rest stacked on the right. Leaves games, dialogs and floating windows alone.",
+        "Icon": "preferences-system-windows-script-test",
+        "Id": "matrixtile",
+        "License": "GPL",
+        "Name": "Matrix Tile",
+        "Version": "1.0"
+    },
+    "X-Plasma-API": "javascript"
+}

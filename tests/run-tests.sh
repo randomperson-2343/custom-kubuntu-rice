@@ -113,6 +113,17 @@ else
   echo "  (skipped: Qt 6 qml runner not installed)"
 fi
 
+echo "== 4b. Matrix Tile against a simulated KWin"
+if command -v node >/dev/null 2>&1; then
+  if node "$ROOT/tests/tile-test.js" > "$WORK/tile.log" 2>&1; then
+    pass "auto-tiler: $(grep -c "PASS.\[0m" "$WORK/tile.log") layout and shortcut checks"
+  else
+    fail "auto-tiler (log below)"; sed 's/^/    /' "$WORK/tile.log"
+  fi
+else
+  echo "  (skipped: node not installed)"
+fi
+
 echo "== 5. install / switch / uninstall in a fake home"
 H="$WORK/home"
 STUB="$WORK/stubs"
@@ -162,6 +173,9 @@ check "color schemes installed for all 3 colors" test -f "$D/color-schemes/Matri
 check "Matrix 95 Plasma style installed (no dev tools inside)" test -f "$D/plasma/desktoptheme/Matrix95-Cyan/metadata.json" -a ! -e "$D/plasma/desktoptheme/Matrix95-Cyan/tools"
 check "Matrix 95 window frames installed" test -f "$D/aurorae/themes/Matrix95-Cyan/Matrix95-Cyanrc"
 check "Start button images for all colors" test -f "$D/matrix-rice/icons/matrix95-start-button-amber.svg"
+check "Matrix Tile script installed" test -f "$D/kwin/scripts/matrixtile/contents/code/main.js"
+check "Matrix Tile switched on" test "$(kr kwinrc Plugins matrixtileEnabled)" = true
+check "KWin told to load scripts" grep -q "org.kde.kwin.Scripting.start" "$LOG"
 check "wallpaper plugin has the rain engine" test -f "$D/plasma/wallpapers/com.github.matrixrice.coderain/contents/ui/MatrixRain.qml"
 check "matrix-rice command linked" test -x "$H/.local/bin/matrix-rice"
 check "Cyan color scheme applied" grep -q "colorscheme MatrixCyan" "$LOG"
@@ -184,6 +198,9 @@ check "switch to amber: prompt" grep -q "Matrix Amber" "$H/.config/starship.toml
 check "switch to amber: login screen" grep -q "ink=#FFB000" "$WORK/sys/sddm-theme/theme.conf"
 check "state remembers amber" grep -q "COLOR=amber" "$H/.config/matrix-rice/state"
 
+run "$H/.local/bin/matrix-rice" tiling off > /dev/null 2>&1
+check "tiling off reaches KWin config" test "$(kr kwinrc Plugins matrixtileEnabled)" = false
+
 run "$H/.local/bin/matrix-rice" rain off > /dev/null 2>&1
 check "rain off reaches lock screen" test "$(kreadconfig5 --file "$H/.config/kscreenlockerrc" --group Greeter --group Wallpaper --group com.github.matrixrice.coderain --group General --key Animated)" = false
 
@@ -205,6 +222,7 @@ check "uninstall: original color scheme re-applied" grep -q "colorscheme BreezeD
 check "uninstall: own starship.toml restored" grep -q "my own prompt" "$H/.config/starship.toml"
 check "uninstall: panel layout restored" cmp -s "$H/.config/plasma-org.kde.plasma.desktop-appletsrc" "$WORK/appletsrc.orig"
 check "uninstall: lock screen plugin key removed" test -z "$(kr kscreenlockerrc Greeter WallpaperPlugin)"
+check "uninstall: tiler removed and its KWin key cleared" test ! -e "$D/kwin/scripts/matrixtile" -a -z "$(kr kwinrc Plugins matrixtileEnabled)"
 check "uninstall: theme files removed" test ! -e "$D/color-schemes/MatrixCyan.colors" -a ! -e "$D/plasma/wallpapers/com.github.matrixrice.coderain"
 check "uninstall: login theme removed" test ! -e "$WORK/sys/sddm-theme" -a ! -e "$WORK/sys/etc/sddm.conf.d/zz-matrix-rice.conf"
 check "uninstall: command removed, backups kept" test ! -e "$H/.local/bin/matrix-rice" -a -d "$D/matrix-rice/backups"

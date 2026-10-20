@@ -55,6 +55,7 @@ connection, and your password (for installing packages and the login screen).
    - back up your current settings,
    - ask whether to replace your bottom panel with the Windows 95 taskbar
      (your old layout is saved),
+   - ask whether to turn on auto-tiling (Matrix Tile, below),
    - ask whether to install the Matrix login screen (needs your password).
 
 4. **Log out and back in** once. Done.
@@ -65,6 +66,7 @@ connection, and your password (for installing packages and the login screen).
 |---|---|
 | `--plain` | Matrix colors only, keep normal KDE shapes (no Windows 95 look) |
 | `--no-taskbar` | Keep your current panels |
+| `--no-tiling` | Don't turn on auto-tiling |
 | `--no-login` | Don't touch the login screen |
 | `--yes` | Don't ask questions, say yes to everything |
 
@@ -75,9 +77,29 @@ matrix-rice cyan            # switch everything to cyan (or green, amber)
 matrix-rice rain off        # stop the live rain (shows a still frame); "on" to restart
 matrix-rice style plain     # normal KDE shapes; "style 95" for the Windows 95 look
 matrix-rice taskbar off     # put your old panels back; "taskbar on" for the Windows 95 taskbar
+matrix-rice tiling off      # stop auto-tiling; "tiling on" to restart
 matrix-rice status          # what's active right now
 rain                        # Matrix rain inside the terminal (press q to quit)
 ```
+
+### Auto-tiling (Matrix Tile)
+
+Windows arrange themselves: one main window on the left (your editor), the
+rest stacked on the right (terminal, browser). Fullscreen games, Steam and
+Proton games, dialogs and pop-ups are never touched. It runs inside KDE's own
+window manager (KWin), so nothing else changes.
+
+| Keys | What it does |
+|---|---|
+| `Meta+Shift+T` | Tiling on/off (use before gaming if you like) |
+| `Meta+F` | Float or tile the current window |
+| `Meta+Enter` | Make the current window the main one |
+| `Meta+[` / `Meta+]` | Shrink / grow the main area |
+| Drag a window onto another | Swap their places |
+
+`matrix-rice tiling off` turns it off for good (`on` to bring it back).
+Keys can be changed in System Settings > Keyboard > Shortcuts > KWin
+(search "Matrix Tile"). If a key does nothing, another app already uses it.
 
 Rain speed, density, character size, frame rate and glow are in
 **right-click desktop > Configure Desktop and Wallpaper**.

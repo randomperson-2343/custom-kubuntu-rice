@@ -43,7 +43,8 @@ for v in "${MR_VARIANTS[@]}"; do
          "$XDG_DATA_HOME/plasma/desktoptheme/Matrix95-$MR_NAME"
 done
 rm -f "$XDG_DATA_HOME/konsole/Matrix.profile"
-rm -rf "$MR_WALLPAPER_DIR" "$MR_SPLASH_DIR"
+rm -rf "$MR_WALLPAPER_DIR" "$MR_SPLASH_DIR" "$MR_TILE_DIR"
+kwin_scripts_reload   # unloads Matrix Tile
 
 # Prompt and banner: give back the user's own files, or remove ours.
 orig="$MR_BACKUP/original-files"

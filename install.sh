@@ -5,6 +5,7 @@
 #
 #   --no-login      leave the login screen alone (no sudo for it)
 #   --no-taskbar    keep your current panels (no Windows 95 taskbar)
+#   --no-tiling     don't turn on auto-tiling (Matrix Tile)
 #   --plain         Matrix colors only, without the Windows 95 shapes
 #   --no-packages   don't install packages with apt
 #   --yes           don't ask questions, use the defaults
@@ -19,16 +20,17 @@ MR_SRC=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 PACKAGES=(fonts-jetbrains-mono fonts-noto-cjk cmatrix fastfetch starship qdbus-qt6
           qml6-module-qtquick-effects qt6-style-kvantum qt5-style-kvantum)
 
-color=green login=yes taskbar=ask style=95 packages=yes assume_yes=no
+color=green login=yes taskbar=ask tiling=ask style=95 packages=yes assume_yes=no
 for arg in "$@"; do
   case "$arg" in
     green|cyan|amber) color=$arg ;;
     --no-login) login=no ;;
     --no-taskbar) taskbar=no ;;
+    --no-tiling) tiling=no ;;
     --plain) style=plain ;;
     --no-packages) packages=no ;;
     --yes|-y) assume_yes=yes ;;
-    -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "Unknown option '$arg'. Try: ./install.sh --help" ;;
   esac
 done
@@ -110,6 +112,7 @@ install_app
 install_variant_files
 install_wallpaper_plugin
 install_splash_package
+install_tiler
 apply_fonts
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
   [ -f "$rc" ] && add_rc_block "$rc" && ok "shell hook in $rc"
@@ -134,6 +137,16 @@ if [ "$style" = 95 ] && [ "$taskbar" != no ] && [ "$(state_get TASKBAR)" != on ]
   fi
 fi
 
+if [ "$tiling" != no ] && [ "$(state_get TILING)" != on ]; then
+  if ask "Turn on auto-tiling? Windows arrange themselves; games are left alone; Meta+Shift+T switches it off" y; then
+    tiling_set on
+  else
+    skip "auto-tiling (turn on later with: matrix-rice tiling on)"
+  fi
+elif [ "$(state_get TILING)" = on ]; then
+  kwin_scripts_reload   # pick up an updated tiler
+fi
+
 if [ "$login" = yes ]; then
   if ask "Install the Matrix login screen? (needs your password)" y; then
     load_palette "$color"
@@ -149,6 +162,7 @@ cat <<NEXT
    Switch colors:    matrix-rice green | cyan | amber
    Rain on/off:      matrix-rice rain on | off
    Plain shapes:     matrix-rice style plain   (back: matrix-rice style 95)
+   Auto-tiling:      matrix-rice tiling on | off   (Meta+Shift+T for gaming)
    Status:           matrix-rice status
    Uninstall:        ~/.local/share/matrix-rice/app/uninstall.sh
    (If 'matrix-rice' is not found yet, log out and in, or use ~/.local/bin/matrix-rice)

@@ -241,3 +241,25 @@ Added at the owner's request while building:
 - Dropped from section 4.3: per-variant Global Theme packages. Picking one in
   System Settings would change KDE but not the terminal, prompt or login
   screen, leaving things out of sync; `matrix-rice <color>` is the one switch.
+
+## 12. Addendum: Matrix Tile (auto-tiling)
+
+Owner asked for "a compatible window manager". KWin stays the window manager
+(replacing it would break every themed piece); the owner chose auto-tiling
+inside KDE. Mature KWin tilers were not usable here: Krohnkite moved to
+Codeberg (unreachable from the build environment, so no version could be
+verified or bundled) and Polonium's maintenance status is unclear. Neither
+is in Ubuntu's repositories, so the owner approved writing our own:
+
+- KWin 6 JavaScript script `matrixtile` (`plasma/kwin-script/matrixtile`),
+  installed to `~/.local/share/kwin/scripts/`, enabled by
+  `kwinrc [Plugins] matrixtileEnabled`, loaded live via
+  `org.kde.KWin /Scripting org.kde.kwin.Scripting.start`.
+- Master/stack layout per monitor and virtual desktop, 4px gaps, main area 58%.
+- Never tiles fullscreen, maximized, dialog, transient, utility, pop-up,
+  skip-taskbar or KWin-tiled windows, or classes starting with steam,
+  gamescope, lutris, heroic, minecraft and KDE system UI.
+- Shortcuts: Meta+Shift+T on/off (Meta+T is KDE's tile editor), Meta+F float,
+  Meta+Return main, Meta+[ / Meta+] resize; drag onto a tile to swap.
+- `matrix-rice tiling on|off`; installer asks; uninstall removes it.
+- Tested with `tests/tile-test.js` (real script, simulated KWin).

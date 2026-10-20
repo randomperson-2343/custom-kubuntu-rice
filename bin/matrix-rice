@@ -18,6 +18,7 @@ matrix-rice: Matrix look for KDE Plasma
   matrix-rice rain on | off          live code rain on or off
   matrix-rice style 95 | plain       Windows 95 shapes, or plain Breeze shapes
   matrix-rice taskbar on | off       Windows 95 taskbar, or your old panels back
+  matrix-rice tiling on | off        auto-tiling windows (Meta+Shift+T toggles it too)
   matrix-rice login install | remove Matrix login screen (asks for your password)
   matrix-rice status                 show current settings
 USAGE
@@ -41,6 +42,8 @@ case "$cmd" in
     esac ;;
   taskbar)
     case "${2:-}" in on) taskbar_on ;; off) taskbar_off; v=$(state_get COLOR); load_palette "${v:-green}"; apply_wallpaper ;; *) die "Use: matrix-rice taskbar on|off" ;; esac ;;
+  tiling)
+    case "${2:-}" in on|off) tiling_set "$2" ;; *) die "Use: matrix-rice tiling on|off" ;; esac ;;
   login)
     case "${2:-}" in
       install) v=$(state_get COLOR); load_palette "${v:-green}"; login_install ;;
@@ -48,9 +51,9 @@ case "$cmd" in
       *) die "Use: matrix-rice login install|remove" ;;
     esac ;;
   status)
-    printf 'color:   %s\nrain:    %s\nstyle:   %s\ntaskbar: %s\nlogin:   %s\n' \
+    printf 'color:   %s\nrain:    %s\nstyle:   %s\ntaskbar: %s\ntiling:  %s\nlogin:   %s\n' \
       "$(state_get COLOR)" "$(state_get RAIN || true)" "$(state_get STYLE)" \
-      "$(state_get TASKBAR)" "$(state_get LOGIN)" | sed 's/: *$/: -/' ;;
+      "$(state_get TASKBAR)" "$(state_get TILING)" "$(state_get LOGIN)" | sed 's/: *$/: -/' ;;
   help|-h|--help|"") usage ;;
   *) usage; exit 1 ;;
 esac

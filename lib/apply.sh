@@ -5,6 +5,8 @@
 MR_SPLASH_ID="com.github.matrixrice.splash"
 MR_WALLPAPER_DIR="$XDG_DATA_HOME/plasma/wallpapers/$MR_PLUGIN_ID"
 MR_SPLASH_DIR="$XDG_DATA_HOME/plasma/look-and-feel/$MR_SPLASH_ID"
+MR_TILE_ID="matrixtile"
+MR_TILE_DIR="$XDG_DATA_HOME/kwin/scripts/$MR_TILE_ID"
 MR_ICONS="$MR_DATA/icons"
 MR_SDDM_DIR="${MR_SDDM_DIR:-/usr/share/sddm/themes/$MR_SDDM_THEME}"
 MR_PANEL_FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
@@ -376,6 +378,42 @@ taskbar_off() {
   restart_plasmashell
   state_set TASKBAR off
   ok "original panel layout restored"
+}
+
+# ---------------------------------------------------------------- tiling
+
+install_tiler() {
+  rm -rf "$MR_TILE_DIR"
+  mkdir -p "$(dirname "$MR_TILE_DIR")"
+  cp -r "$MR_SRC/plasma/kwin-script/$MR_TILE_ID" "$MR_TILE_DIR"
+  ok "Matrix Tile auto-tiler"
+}
+
+# Makes KWin (re)load its scripts. Unloading first means an updated
+# main.js is picked up without logging out.
+kwin_scripts_reload() {
+  if have qdbus6; then
+    qdbus6 org.kde.KWin /Scripting org.kde.kwin.Scripting.unloadScript "$MR_TILE_ID" >/dev/null 2>&1 || true
+    qdbus6 org.kde.KWin /Scripting org.kde.kwin.Scripting.start >/dev/null 2>&1 || true
+  else
+    dbus-send --session --type=method_call --dest=org.kde.KWin /Scripting \
+      org.kde.kwin.Scripting.unloadScript "string:$MR_TILE_ID" 2>/dev/null || true
+    dbus-send --session --type=method_call --dest=org.kde.KWin /Scripting \
+      org.kde.kwin.Scripting.start 2>/dev/null || true
+  fi
+}
+
+# tiling_set on|off
+tiling_set() {
+  [ -d "$MR_TILE_DIR" ] || { skip "tiling (Matrix Tile not installed)"; return 0; }
+  if [ "$1" = on ]; then
+    set_key kwinrc Plugins "${MR_TILE_ID}Enabled" true
+  else
+    set_key kwinrc Plugins "${MR_TILE_ID}Enabled" false
+  fi
+  kwin_scripts_reload
+  state_set TILING "$1"
+  ok "auto-tiling: $1 (Meta+Shift+T switches it for this session)"
 }
 
 # ---------------------------------------------------------------- login screen
