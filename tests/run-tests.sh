@@ -92,9 +92,23 @@ if [ -x "$QML" ]; then
   check "code rain renders" test -s "$WORK/rain.png"
   mkdir -p "$WORK/sddm"
   cp "$ROOT"/sddm/matrix-rice/* "$ROOT"/rain/*.qml "$WORK/sddm/"
-  (cd "$ROOT" && timeout 30 "$QML" tests/sddm-preview.qml -- "$WORK/login.png" "$WORK/sddm" \
-     "#030A04" "#08140A" "#00FF41" "#D8FFE0" "#009A14" "#003B00" "#FF3B3B" >/dev/null 2>&1)
-  check "login screen renders" test -s "$WORK/login.png"
+  for pv in green cyan amber; do
+    (MR_SRC=$ROOT; . "$ROOT/lib/common.sh"; load_palette "$pv"; render "$ROOT/templates/sddm/theme.conf" "$WORK/sddm/theme-$pv.conf")
+    (cd "$ROOT" && QML_XHR_ALLOW_FILE_READ=1 timeout 30 "$QML" tests/sddm-preview.qml -- \
+       "$WORK/login-$pv.png" "$WORK/sddm" "$WORK/sddm/theme-$pv.conf" >/dev/null 2>&1)
+    check "login screen renders ($pv)" test -s "$WORK/login-$pv.png"
+  done
+  (cd "$ROOT" && QML_XHR_ALLOW_FILE_READ=1 timeout 30 "$QML" tests/sddm-preview.qml -- \
+     "$WORK/login-fail.png" "$WORK/sddm" "$WORK/sddm/theme-green.conf" fail >/dev/null 2>&1)
+  check "login screen renders failed-login state" test -s "$WORK/login-fail.png"
+  if [ -f "$ROOT/tests/splash-preview.qml" ]; then
+    mkdir -p "$WORK/splash"
+    cp "$ROOT"/rain/*.qml "$WORK/splash/"
+    (MR_SRC=$ROOT; . "$ROOT/lib/common.sh"; load_palette green; render "$ROOT/templates/splash/Splash.qml" "$WORK/splash/Splash.qml")
+    check "splash template renders" test -s "$WORK/splash/Splash.qml"
+    (cd "$ROOT" && timeout 40 "$QML" tests/splash-preview.qml -- "$WORK/splash" "$WORK/splash.png" still >/dev/null 2>&1)
+    check "splash screen renders" test -s "$WORK/splash.png"
+  fi
 else
   echo "  (skipped: Qt 6 qml runner not installed)"
 fi

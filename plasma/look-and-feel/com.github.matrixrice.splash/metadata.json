@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "matrix-rice"
+            }
+        ],
+        "Category": "",
+        "Description": "Matrix 95 startup splash: Windows 95 boot screen homage in Matrix code rain colors",
+        "Id": "com.github.matrixrice.splash",
+        "License": "GPL-2.0-or-later",
+        "Name": "Matrix 95 Splash",
+        "Version": "1.0",
+        "Website": "https://github.com/randomperson-2343/custom-kubuntu-rice"
+    },
+    "X-Plasma-APIVersion": "2"
+}
