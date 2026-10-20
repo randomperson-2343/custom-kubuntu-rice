@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Matrix 95 ({{NAME}})
+Comment=Windows 95 style window frames in Matrix {{NAME}} colors
+Type=Service
+X-KDE-PluginInfo-Name=Matrix95-{{NAME}}
+X-KDE-PluginInfo-Author=matrix-rice
+X-KDE-PluginInfo-License=GPL-2.0-or-later

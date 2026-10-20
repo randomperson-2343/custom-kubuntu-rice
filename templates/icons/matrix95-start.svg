@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <title>Matrix 95 start logo ({{NAME}})</title>
+  <rect x="11" y="3" width="3" height="1" fill="{{FG}}"/>
+  <rect x="16" y="3" width="2" height="1" fill="{{HEAD}}"/>
+  <rect x="8" y="4" width="6" height="1" fill="{{FG}}"/>
+  <rect x="16" y="4" width="5" height="1" fill="{{HEAD}}"/>
+  <rect x="2" y="5" width="3" height="2" fill="{{FG}}"/>
+  <rect x="6" y="5" width="8" height="6" fill="{{FG}}"/>
+  <rect x="16" y="5" width="8" height="6" fill="{{HEAD}}"/>
+  <rect x="0" y="9" width="5" height="2" fill="{{DIM}}"/>
+  <rect x="6" y="11" width="5" height="1" fill="{{FG}}"/>
+  <rect x="18" y="11" width="6" height="1" fill="{{HEAD}}"/>
+  <rect x="6" y="12" width="2" height="1" fill="{{FG}}"/>
+  <rect x="21" y="12" width="3" height="1" fill="{{HEAD}}"/>
+  <rect x="1" y="13" width="4" height="2" fill="{{HILITE}}"/>
+  <rect x="11" y="13" width="3" height="1" fill="{{DIM}}"/>
+  <rect x="16" y="13" width="2" height="1" fill="{{HILITE}}"/>
+  <rect x="8" y="14" width="6" height="1" fill="{{DIM}}"/>
+  <rect x="16" y="14" width="5" height="1" fill="{{HILITE}}"/>
+  <rect x="6" y="15" width="8" height="6" fill="{{DIM}}"/>
+  <rect x="16" y="15" width="8" height="6" fill="{{HILITE}}"/>
+  <rect x="0" y="17" width="5" height="2" fill="{{DIM}}"/>
+  <rect x="2" y="21" width="3" height="1" fill="{{FG}}"/>
+  <rect x="6" y="21" width="5" height="1" fill="{{DIM}}"/>
+  <rect x="18" y="21" width="6" height="1" fill="{{HILITE}}"/>
+  <rect x="6" y="22" width="2" height="1" fill="{{DIM}}"/>
+  <rect x="21" y="22" width="3" height="1" fill="{{HILITE}}"/>
+</svg>

@@ -58,6 +58,16 @@ kwin_reconfigure() {
   fi
 }
 
+# Plasma 6.6 serves SVG window decorations from the ".v2" Aurorae plugin;
+# older builds only have the plain one.
+aurorae_library() {
+  if [ -n "$(find /usr/lib -path '*plugins/org.kde.kdecoration*/org.kde.kwin.aurorae.v2.so' -print -quit 2>/dev/null)" ]; then
+    echo org.kde.kwin.aurorae.v2
+  else
+    echo org.kde.kwin.aurorae
+  fi
+}
+
 have_kvantum() {
   [ -n "$(find /usr/lib -path '*qt6/plugins/styles/*kvantum*' -print -quit 2>/dev/null)" ]
 }
@@ -184,10 +194,10 @@ apply_style() {
       plasma-apply-desktoptheme "Matrix95-$MR_NAME" >/dev/null 2>&1 || warn "could not apply Plasma style Matrix95-$MR_NAME"
     fi
     if [ -d "$XDG_DATA_HOME/aurorae/themes/Matrix95-$MR_NAME" ]; then
-      set_key kwinrc org.kde.kdecoration2 library org.kde.kwin.aurorae
+      set_key kwinrc org.kde.kdecoration2 library "$(aurorae_library)"
       set_key kwinrc org.kde.kdecoration2 theme "__aurorae__svg__Matrix95-$MR_NAME"
       set_key kwinrc org.kde.kdecoration2 ButtonsOnLeft M
-      set_key kwinrc org.kde.kdecoration2 ButtonsOnRight IAX
+      set_key kwinrc org.kde.kdecoration2 ButtonsOnRight IA_X
       kwin_reconfigure
     fi
     if have_kvantum && [ -d "$XDG_CONFIG_HOME/Kvantum/Matrix95-$MR_NAME" ]; then
