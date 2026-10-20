@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<!--
+    Motion Lab: tune the Matrix code rain before installing it.
+    A p5.js port of rain/MatrixRain.qml built on the algorithmic-art viewer template
+    (Seed / Parameters / Colors / Actions sidebar). Philosophy: docs/motion/philosophy.md.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Lab</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Anthropic Brand Colors */
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar h1 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .sidebar .subtitle {
+            color: var(--anthropic-mid-gray);
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        /* Control Sections */
+        .control-section {
+            margin-bottom: 32px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section h3::before {
+            content: '•';
+            color: var(--anthropic-orange);
+            font-weight: bold;
+        }
+
+        /* Seed Controls */
+        .seed-input {
+            width: 100%;
+            background: var(--anthropic-light);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--anthropic-light-gray);
+            text-align: center;
+        }
+
+        .seed-input:focus {
+            outline: none;
+            border-color: var(--anthropic-orange);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1);
+            background: white;
+        }
+
+        .seed-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .regen-button {
+            margin-bottom: 0;
+        }
+
+        /* Parameter Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--anthropic-light-gray);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #c86641;
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Color Pickers */
+        .color-group {
+            margin-bottom: 16px;
+        }
+
+        .color-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            margin-bottom: 4px;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-picker-container input[type="color"] {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        .color-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+        }
+
+        /* Buttons */
+        .button {
+            background: var(--anthropic-orange);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .button:hover {
+            background: #c86641;
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: var(--anthropic-blue);
+        }
+
+        .button.secondary:hover {
+            background: #5a8bb8;
+        }
+
+        .button.tertiary {
+            background: var(--anthropic-green);
+        }
+
+        .button.tertiary:hover {
+            background: #6b7b52;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .button-row .button {
+            flex: 1;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        #canvas-container {
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(20, 20, 19, 0.1);
+            background: white;
+        }
+
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--anthropic-mid-gray);
+        }
+
+
+        /* Motion Lab additions */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 14px;
+            cursor: pointer;
+        }
+        .toggle-row input { width: 18px; height: 18px; accent-color: var(--anthropic-orange); }
+        select.palette-select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--anthropic-light-gray);
+            background: var(--anthropic-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+        .readout {
+            background: var(--anthropic-dark);
+            color: #b8f5c4;
+            font-family: 'Courier New', monospace;
+            font-size: 12.5px;
+            line-height: 1.5;
+            padding: 12px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 10px;
+        }
+        .readout .dim { color: var(--anthropic-mid-gray); }
+        .note { font-size: 12px; line-height: 1.5; color: #6d6b63; margin-top: 10px; }
+        .hud { font-family: 'Courier New', monospace; font-size: 11px; color: var(--anthropic-mid-gray); margin-top: 8px; }
+        .canvas-column { width: 100%; max-width: 1000px; }
+        @media (min-width: 601px) {
+            .canvas-area { align-items: flex-start; }
+            .canvas-column { position: sticky; top: 20px; }
+        }
+
+        /* Responsive - Stack on mobile */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            /* Keep the rain pinned above the controls so tuning is visible on a phone. */
+            .canvas-area {
+                order: -1;
+                position: sticky;
+                top: 0;
+                z-index: 5;
+                padding: 0 0 8px;
+                background: var(--anthropic-light);
+            }
+            .sidebar { padding: 18px; }
+            .color-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Control Sidebar -->
+        <div class="sidebar">
+            <h1>Motion Lab</h1>
+            <div class="subtitle">Tune the Matrix code rain before installing it. A p5.js port of the wallpaper's MatrixRain.qml engine.</div>
+
+            <!-- Seed Section (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Seed</h3>
+                <input type="number" id="seed-input" class="seed-input" value="1995" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="button secondary" onclick="previousSeed()">&larr; Prev</button>
+                    <button class="button secondary" onclick="nextSeed()">Next &rarr;</button>
+                </div>
+                <button class="button tertiary regen-button" onclick="randomSeedAndUpdate()">&#8635; Random</button>
+            </div>
+
+            <!-- Parameters Section: same names and ranges as the wallpaper settings -->
+            <div class="control-section">
+                <h3>Parameters</h3>
+
+                <div class="control-group">
+                    <label for="speed">Speed</label>
+                    <div class="slider-container">
+                        <input type="range" id="speed" min="0.3" max="3" step="0.1" value="1" oninput="updateParam('speed', this.value)">
+                        <span class="value-display" id="speed-value">1.0x</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="density">Density</label>
+                    <div class="slider-container">
+                        <input type="range" id="density" min="0.1" max="1" step="0.05" value="0.75" oninput="updateParam('density', this.value)">
+                        <span class="value-display" id="density-value">75%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="glyphSize">Character size</label>
+                    <div class="slider-container">
+                        <input type="range" id="glyphSize" min="8" max="64" step="1" value="18" oninput="updateParam('glyphSize', this.value)">
+                        <span class="value-display" id="glyphSize-value">18</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="fps">Frame rate cap</label>
+                    <div class="slider-container">
+                        <input type="range" id="fps" min="10" max="60" step="1" value="30" oninput="updateParam('fps', this.value)">
+                        <span class="value-display" id="fps-value">30</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="trail">Trail rows <span style="font-weight:400;color:#8a887f">(engine only)</span></label>
+                    <div class="slider-container">
+                        <input type="range" id="trail" min="4" max="60" step="1" value="26" oninput="updateParam('trail', this.value)">
+                        <span class="value-display" id="trail-value">26</span>
+                    </div>
+                </div>
+
+                <label class="toggle-row"><input type="checkbox" id="glow" checked onchange="updateToggle('glow', this.checked)"> Glow (soft bloom)</label>
+                <label class="toggle-row"><input type="checkbox" id="animated" checked onchange="updateToggle('animated', this.checked)"> Live rain (off shows a still frame)</label>
+            </div>
+
+            <!-- Wallpaper read-out -->
+            <div class="control-section">
+                <h3>Wallpaper settings</h3>
+                <div class="readout" id="readout" aria-live="polite"></div>
+                <button class="button secondary" id="copy-btn" onclick="copyReadout()">Copy settings</button>
+                <p class="note">Apply these in <b>Configure Desktop and Wallpaper</b> with the Matrix Code Rain wallpaper: Speed (slider), Density (percent slider), Character size, Frame rate cap and the Glow checkbox. Trail rows has no control there; it is a property of MatrixRain.qml (default 26).</p>
+            </div>
+
+            <!-- Colors -->
+            <div class="control-section">
+                <h3>Colors</h3>
+                <select class="palette-select" id="palette" onchange="selectPalette(this.value)" aria-label="Palette">
+                    <option value="green">Green (matrix-rice green)</option>
+                    <option value="cyan">Cyan (matrix-rice cyan)</option>
+                    <option value="amber">Amber (matrix-rice amber)</option>
+                    <option value="custom" disabled>Custom</option>
+                </select>
+                <div class="color-grid">
+                    <div class="color-group">
+                        <label for="color-bg">Background (BG)</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="color-bg" value="#030a04" oninput="updateColor('bg', this.value)">
+                            <span class="color-value" id="color-bg-value">#030A04</span>
+                        </div>
+                    </div>
+                    <div class="color-group">
+                        <label for="color-fg">Ink (FG)</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="color-fg" value="#00ff41" oninput="updateColor('fg', this.value)">
+                            <span class="color-value" id="color-fg-value">#00FF41</span>
+                        </div>
+                    </div>
+                    <div class="color-group">
+                        <label for="color-head">Head (HEAD)</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="color-head" value="#d8ffe0" oninput="updateColor('head', this.value)">
+                            <span class="color-value" id="color-head-value">#D8FFE0</span>
+                        </div>
+                    </div>
+                    <div class="color-group">
+                        <label for="color-dim">Flicker (DIM)</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="color-dim" value="#009a14" oninput="updateColor('dim', this.value)">
+                            <span class="color-value" id="color-dim-value">#009A14</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="note">The wallpaper takes its colors from the active variant, switched with <code>matrix-rice green|cyan|amber</code>. The pickers are for exploring only.</p>
+            </div>
+
+            <!-- Actions Section (ALWAYS KEEP THIS) -->
+            <div class="control-section">
+                <h3>Actions</h3>
+                <div class="button-row" style="margin-bottom:8px">
+                    <button class="button secondary" onclick="regenerate()">Regenerate</button>
+                    <button class="button" onclick="resetParameters()">Reset</button>
+                </div>
+                <button class="button tertiary" onclick="downloadPNG()">Download PNG</button>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <div class="canvas-column">
+                <div id="canvas-container">
+                    <div class="loading" style="padding:40px 16px;font-family:'Courier New',monospace;font-size:14px">Counting memory... 640K OK</div>
+                </div>
+                <div class="hud" id="hud">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // PARAMETERS. Names, meanings and ranges mirror the wallpaper's main.xml
+        // and config.qml (Speed, Density, GlyphSize, Fps, Glow, Animated), plus
+        // MatrixRain.qml's own `trail` property (default 26, no wallpaper UI).
+        // ═══════════════════════════════════════════════════════════════════════
+
+        // Exact values from palettes/green.sh, cyan.sh, amber.sh (BG, FG, HEAD, DIM).
+        const PALETTES = {
+            green: { bg: '#030A04', fg: '#00FF41', head: '#D8FFE0', dim: '#009A14' },
+            cyan:  { bg: '#02080B', fg: '#00E5FF', head: '#E0FBFF', dim: '#0099A8' },
+            amber: { bg: '#0A0602', fg: '#FFB000', head: '#FFF1CC', dim: '#AD7A00' }
+        };
+
+        let params = {
+            seed: 1995,            // the year of the machine it dreams of
+            speed: 1.0,            // 0.3 .. 3.0, multiplier on the base fall speed
+            density: 0.75,         // 0.1 .. 1.0, share of columns that rain at once
+            glyphSize: 18,         // 8 .. 64, logical pixels per cell
+            fps: 30,               // 10 .. 60
+            trail: 26,             // rows (engine default; not in the wallpaper UI)
+            glow: true,
+            animated: true,
+            palette: 'green',
+            colors: { ...PALETTES.green }
+        };
+        let defaultParams = JSON.parse(JSON.stringify(params));
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ENGINE: a line-for-line port of rain/MatrixRain.qml onto a 2D canvas.
+        // ═══════════════════════════════════════════════════════════════════════
+
+        const FONT_FAMILY = "'Noto Sans Mono CJK JP', 'Noto Sans CJK JP', 'MS Gothic', 'Osaka-Mono', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', monospace";
+
+        const Rain = {
+            // Half-width katakana, digits and a few symbols, like the film.
+            glyphs: "ｦｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾙﾚﾛﾜﾝ0123456789Z:.\"=*+-<>|",
+            baseRowsPerSecond: 13,
+            dpr: 1,
+            cssW: 600, cssH: 375,
+            width: 600, height: 375,       // physical canvas px (QML canvas.width/height)
+            cell: 1, cols: 0, rows: 0, drops: [],
+            needsReset: true,
+            buf: null, bctx: null,         // the rain itself (QML Canvas)
+            small: null, sctx: null,       // glow: 1/4 size
+            tiny: null, tctx: null,        // glow fallback: 1/16 size when ctx.filter is missing
+            hasFilter: false,
+
+            avgRowsPerFrame() {
+                // Column speeds are base * (0.45 .. 1.25), average 0.85.
+                return this.baseRowsPerSecond * params.speed * 0.85 / Math.max(1, params.fps);
+            },
+
+            rgba(hex, a) {
+                const n = parseInt(hex.slice(1), 16);
+                return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+            },
+
+            randomGlyph() {
+                return this.glyphs.charAt(Math.floor(random() * this.glyphs.length));
+            },
+
+            newDrop(stagger) {
+                return {
+                    y: -random() * this.rows * (stagger ? 1.0 : 0.6),
+                    v: this.baseRowsPerSecond * params.speed * (0.45 + random() * 0.8) / Math.max(1, params.fps),
+                    row: -1000000,
+                    ch: this.randomGlyph(),
+                    mirror: random() < 0.25,
+                    active: random() < params.density
+                };
+            },
+
+            drawCell(ctx, col, row, color, ch, mirror) {
+                const c = this.cell, x = col * c, y = row * c;
+                ctx.fillStyle = params.colors.bg;
+                ctx.fillRect(x, y, c, c);
+                ctx.fillStyle = color;
+                if (mirror) {
+                    ctx.save();
+                    ctx.translate(x + c, y);
+                    ctx.scale(-1, 1);
+                    ctx.fillText(ch, c * 0.1, c * 0.05);
+                    ctx.restore();
+                } else {
+                    ctx.fillText(ch, x + c * 0.1, y + c * 0.05);
+                }
+            },
+
+            eraseCell(ctx, col, row) {
+                const c = this.cell;
+                ctx.fillStyle = params.colors.bg;
+                ctx.fillRect(col * c, row * c, c, c);
+            },
+
+            reset(ctx) {
+                this.cell = Math.max(4, Math.round(params.glyphSize * this.dpr));
+                this.cols = Math.ceil(this.width / this.cell);
+                this.rows = Math.ceil(this.height / this.cell);
+                const d = [];
+                for (let i = 0; i < this.cols; i++) d.push(this.newDrop(true));
+                this.drops = d;
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = params.colors.bg;
+                ctx.fillRect(0, 0, this.width, this.height);
+                this.needsReset = false;
+            },
+
+            step(ctx, fadeStyle, fontStr) {
+                const rows = this.rows, drops = this.drops, trail = params.trail;
+                const ink = params.colors.fg, head = params.colors.head;
+
+                ctx.fillStyle = fadeStyle;
+                ctx.fillRect(0, 0, this.width, this.height);
+                // Browser-only fix (not in the QML): Chromium rounds the faded channels down,
+                // so the empty field would sink below the background and the tail eraser's
+                // exact-background cells would show as pale blocks. Clamp each channel to
+                // the background colour ('lighten' = per-channel max) to hold the floor.
+                ctx.globalCompositeOperation = 'lighten';
+                ctx.fillStyle = params.colors.bg;
+                ctx.fillRect(0, 0, this.width, this.height);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.font = fontStr;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const d = drops[i];
+                    d.y += d.v;
+                    const row = Math.floor(d.y);
+                    if (row !== d.row) {
+                        const from = Math.max(d.row, row - trail - 1);
+                        for (let r = from + 1; r <= row; r++) {
+                            if (!d.active) continue;
+                            // Old head becomes normal ink, new cell gets a fresh glyph.
+                            if (r - 1 >= 0 && r - 1 < rows) this.drawCell(ctx, i, r - 1, ink, d.ch, d.mirror);
+                            d.ch = this.randomGlyph();
+                            d.mirror = random() < 0.25;
+                            const tail = r - trail;
+                            if (tail >= 0 && tail < rows) this.eraseCell(ctx, i, tail);
+                        }
+                        d.row = row;
+                    }
+                    if (d.active && row >= 0 && row < rows) this.drawCell(ctx, i, row, head, d.ch, d.mirror);
+                    if (row - trail > rows) drops[i] = this.newDrop(false);
+                }
+
+                // Flicker: a few glyphs inside live trails change character.
+                const flickers = Math.ceil(drops.length * 0.04);
+                const dim = params.colors.dim;
+                for (let f = 0; f < flickers; f++) {
+                    const k = Math.floor(random() * drops.length);
+                    const fd = drops[k];
+                    if (!fd.active) continue;
+                    const fr = fd.row - 2 - Math.floor(random() * trail * 0.5);
+                    if (fr >= 0 && fr < rows && fr > fd.row - trail)
+                        this.drawCell(ctx, k, fr, dim, this.randomGlyph(), random() < 0.25);
+                }
+            },
+
+            frame() {
+                const ctx = this.bctx, trail = params.trail;
+                let n = 1;
+                if (this.needsReset) {
+                    this.reset(ctx);
+                    // Rain switched off: pre-run enough frames to leave a full still image.
+                    if (!params.animated) n = Math.ceil((this.rows + trail) / Math.max(0.001, this.avgRowsPerFrame()));
+                }
+                // Fade so a glyph drops to ~4% brightness over one trail length.
+                const framesPerTrail = trail / Math.max(0.001, this.avgRowsPerFrame());
+                const alpha = 1 - Math.pow(0.04, 1 / Math.max(1, framesPerTrail));
+                const fadeStyle = this.rgba(params.colors.bg, alpha.toFixed(4));
+                const fontStr = 'bold ' + Math.round(this.cell * 0.9) + "px " + FONT_FAMILY;
+                ctx.textBaseline = 'top';
+                for (let i = 0; i < n; i++) this.step(ctx, fadeStyle, fontStr);
+            },
+
+            // Browser stand-in for MatrixGlow.qml: MultiEffect { blur: 0.6, blurMax: 32,
+            // opacity: 0.55 } laid over the canvas. We blur a quarter-size copy and
+            // blend it back at 0.55 with normal compositing, as the QML item does.
+            compose() {
+                const m = window._mainCtx;
+                if (!m) return;
+                m.globalAlpha = 1;
+                m.drawImage(this.buf, 0, 0);
+                if (!params.glow) return;
+                const s = this.sctx;
+                s.clearRect(0, 0, this.small.width, this.small.height);
+                if (this.hasFilter) {
+                    // sigma ~ 0.6 * 32 / 2 physical px, at quarter resolution
+                    s.filter = 'blur(' + (0.6 * 32 / 2 * this.dpr / 4).toFixed(2) + 'px)';
+                    s.drawImage(this.buf, 0, 0, this.small.width, this.small.height);
+                    s.filter = 'none';
+                } else {
+                    // No ctx.filter (older Safari): repeated bilinear down/up-scaling.
+                    this.tctx.clearRect(0, 0, this.tiny.width, this.tiny.height);
+                    this.tctx.drawImage(this.buf, 0, 0, this.tiny.width, this.tiny.height);
+                    s.imageSmoothingEnabled = true;
+                    s.drawImage(this.tiny, 0, 0, this.small.width, this.small.height);
+                }
+                m.globalAlpha = 0.55;
+                m.drawImage(this.small, 0, 0, this.width, this.height);
+                m.globalAlpha = 1;
+            },
+
+            resize() {
+                this.dpr = Math.min(3, window.devicePixelRatio || 1);
+                const host = document.getElementById('canvas-container');
+                this.cssW = Math.max(200, Math.floor(host.clientWidth));
+                this.cssH = Math.round(this.cssW * 0.625);
+                this.width = Math.max(1, Math.ceil(this.cssW * this.dpr));
+                this.height = Math.max(1, Math.ceil(this.cssH * this.dpr));
+                const mk = (c, w, h) => { c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); };
+                if (!this.buf) {
+                    this.buf = document.createElement('canvas'); this.bctx = this.buf.getContext('2d');
+                    this.small = document.createElement('canvas'); this.sctx = this.small.getContext('2d');
+                    this.tiny = document.createElement('canvas'); this.tctx = this.tiny.getContext('2d');
+                    this.hasFilter = 'filter' in this.sctx;
+                }
+                mk(this.buf, this.width, this.height);
+                mk(this.small, this.width / 4, this.height / 4);
+                mk(this.tiny, this.width / 16, this.height / 16);
+                this.needsReset = true;
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // P5.JS LIFECYCLE
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let lastHud = 0;
+
+        function setup() {
+            pixelDensity(1); // the engine manages its own device-pixel ratio, like the QML Canvas
+            Rain.resize();
+            const c = createCanvas(Rain.width, Rain.height);
+            c.parent('canvas-container');
+            window._mainCtx = drawingContext;
+            frameRate(params.fps);
+            const loading = document.querySelector('.loading');
+            if (loading) loading.style.display = 'none';
+            syncUI();
+            restart();
+        }
+
+        function draw() {
+            // A still frame (Live rain off) is painted once on reset, then only recomposited.
+            if (params.animated || Rain.needsReset) Rain.frame();
+            Rain.compose();
+            const now = millis();
+            if (now - lastHud > 500) { lastHud = now; updateHud(); }
+        }
+
+        function windowResized() {
+            const host = document.getElementById('canvas-container');
+            if (Math.floor(host.clientWidth) === Rain.cssW && Math.round(window.devicePixelRatio || 1) === Math.round(Rain.dpr)) return;
+            Rain.resize();
+            resizeCanvas(Rain.width, Rain.height, true);
+            window._mainCtx = drawingContext;
+            restart();
+        }
+
+        // Mirrors MatrixRain.qml's restart(): every tunable property change clears and
+        // refills the field. The seed is re-applied so the same settings always give
+        // the same rain, frame for frame.
+        function restart() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+            Rain.needsReset = true;
+            frameRate(params.fps);
+            if (params.animated) { loop(); }
+            else { redraw(); noLoop(); }
+            updateReadout();
+        }
+
+        function updateHud() {
+            const el = document.getElementById('hud');
+            if (!el) return;
+            const fpsNow = params.animated ? frameRate().toFixed(1) + ' fps measured' : 'still frame';
+            el.textContent = Rain.cols + ' x ' + Rain.rows + ' cells  |  cell ' + Rain.cell + ' px  |  ' + fpsNow;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // READ-OUT: the settings in the form the wallpaper page takes
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function settingsLine() {
+            return 'Speed=' + params.speed.toFixed(1) +
+                '  Density=' + params.density.toFixed(2) +
+                '  GlyphSize=' + params.glyphSize +
+                '  Fps=' + params.fps +
+                '  Glow=' + params.glow;
+        }
+
+        function updateReadout() {
+            const el = document.getElementById('readout');
+            if (!el) return;
+            const pal = params.palette === 'custom' ? 'custom colors (exploring only)' : 'matrix-rice ' + params.palette;
+            el.innerHTML = '';
+            const line = document.createElement('div');
+            line.textContent = settingsLine();
+            const extra = document.createElement('div');
+            extra.className = 'dim';
+            extra.textContent = 'Animated=' + params.animated + '  |  trail=' + params.trail + ' rows (engine)  |  seed=' + params.seed + '  |  ' + pal;
+            el.appendChild(line);
+            el.appendChild(extra);
+        }
+
+        function copyReadout() {
+            const text = settingsLine();
+            const btn = document.getElementById('copy-btn');
+            const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy settings'; }, 1200); };
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done, () => selectReadout());
+                    return;
+                }
+            } catch (e) { /* fall through */ }
+            selectReadout();
+        }
+        function selectReadout() {
+            try {
+                const r = document.createRange();
+                r.selectNodeContents(document.getElementById('readout').firstChild);
+                const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+            } catch (e) { /* nothing more to do */ }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // UI CONTROL HANDLERS
+        // ═══════════════════════════════════════════════════════════════════════
+
+        const FORMAT = {
+            speed: v => v.toFixed(1) + 'x',
+            density: v => Math.round(v * 100) + '%',
+            glyphSize: v => String(v),
+            fps: v => String(v),
+            trail: v => String(v)
+        };
+
+        function updateParam(name, value) {
+            const v = (name === 'speed' || name === 'density') ? parseFloat(value) : parseInt(value, 10);
+            if (isNaN(v)) return;
+            params[name] = v;
+            document.getElementById(name + '-value').textContent = FORMAT[name](v);
+            restart();
+        }
+
+        function updateToggle(name, checked) {
+            params[name] = !!checked;
+            if (name === 'glow') {
+                // The glow does not restart the rain (MatrixRain.qml just loads/unloads it).
+                if (!params.animated) redraw();
+                updateReadout();
+            } else {
+                restart();
+            }
+        }
+
+        function updateColor(key, value) {
+            params.colors[key] = value.toUpperCase();
+            document.getElementById('color-' + key + '-value').textContent = value.toUpperCase();
+            params.palette = 'custom';
+            document.getElementById('palette').value = 'custom';
+            restart();
+        }
+
+        function selectPalette(name) {
+            if (!PALETTES[name]) return;
+            params.palette = name;
+            params.colors = { ...PALETTES[name] };
+            syncColorUI();
+            restart();
+        }
+
+        function syncColorUI() {
+            ['bg', 'fg', 'head', 'dim'].forEach(k => {
+                document.getElementById('color-' + k).value = params.colors[k].toLowerCase();
+                document.getElementById('color-' + k + '-value').textContent = params.colors[k].toUpperCase();
+            });
+            document.getElementById('palette').value = params.palette;
+        }
+
+        function syncUI() {
+            ['speed', 'density', 'glyphSize', 'fps', 'trail'].forEach(n => {
+                document.getElementById(n).value = params[n];
+                document.getElementById(n + '-value').textContent = FORMAT[n](params[n]);
+            });
+            document.getElementById('glow').checked = params.glow;
+            document.getElementById('animated').checked = params.animated;
+            syncColorUI();
+            updateSeedDisplay();
+        }
+
+        function regenerate() { restart(); }
+
+        function downloadPNG() {
+            saveCanvas('motion-lab-' + params.seed, 'png');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SEED CONTROL FUNCTIONS - ALWAYS KEEP THESE
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function updateSeedDisplay() {
+            document.getElementById('seed-input').value = params.seed;
+        }
+
+        function updateSeed() {
+            let input = document.getElementById('seed-input');
+            let newSeed = parseInt(input.value);
+            if (newSeed && newSeed > 0) {
+                params.seed = newSeed;
+                restart();
+            } else {
+                updateSeedDisplay();
+            }
+        }
+
+        function previousSeed() {
+            params.seed = Math.max(1, params.seed - 1);
+            updateSeedDisplay();
+            restart();
+        }
+
+        function nextSeed() {
+            params.seed = params.seed + 1;
+            updateSeedDisplay();
+            restart();
+        }
+
+        function randomSeedAndUpdate() {
+            params.seed = Math.floor(Math.random() * 999999) + 1;
+            updateSeedDisplay();
+            restart();
+        }
+
+        function resetParameters() {
+            params = JSON.parse(JSON.stringify(defaultParams));
+            syncUI();
+            restart();
+        }
+
+        window.addEventListener('load', function () {
+            updateSeedDisplay();
+            if (typeof p5 === 'undefined') {
+                const l = document.querySelector('.loading');
+                if (l) l.textContent = 'p5.js could not be loaded from cdnjs.cloudflare.com. Check your connection and reload.';
+            }
+        });
+    </script>
+</body>
+</html>

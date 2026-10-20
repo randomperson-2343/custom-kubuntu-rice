@@ -211,3 +211,33 @@ Manual (owner, on the LOQ):
   on a 1440p or higher external monitor it may use more CPU; the frame rate
   and density settings are there for that.
 - Battery life drops while unplugged because the rain never pauses.
+
+## 11. Addendum (same day): Matrix 95 layer and changes during the build
+
+Added at the owner's request while building:
+
+- **Matrix 95 style** (default on, `--plain` / `matrix-rice style plain` to turn
+  off): a Windows 95 look recolored with the Matrix palettes.
+  - Window frames: Aurorae SVG decoration `Matrix95-<Color>` (raised 3D bevel,
+    solid title bar, `_ □ ×` buttons on the right, app menu icon on the left).
+  - Widgets: Kvantum theme `Matrix95-<Color>` (bevelled buttons, sunken fields,
+    dithered scrollbar tracks, segmented progress bars). Needs `qt6-style-kvantum`.
+  - Plasma style `Matrix95-<Color>`: Windows 95 taskbar look for the panel,
+    task buttons and popups.
+  - Taskbar layout (asked during install, `matrix-rice taskbar on|off`):
+    bottom panel with "Start" + named task buttons + tray + clock. The previous
+    panel files are saved and restored on `taskbar off` / uninstall.
+  - Startup splash after login: "Matrix 95" homage to the Windows 95 boot
+    screen, with rain and the scrolling color bar.
+- **Login screen** redesigned as a Windows 95 log-on dialog over the rain; the
+  "MATRIX // hostname" header was removed (owner: "ugly").
+- Palettes gained Windows 95 bevel roles: FACE, HILITE, LIGHT, SHADOW,
+  DKSHADOW, TITLE, TITLE_INACTIVE, TITLE_INACTIVE_TEXT.
+- **Motion Lab** (`docs/motion/motion-lab.html`): browser page to tune the
+  rain before installing; a faithful port of `rain/MatrixRain.qml`.
+- Glow: a real canvas shadow cost ~10x CPU, so glow is a GPU blur layer
+  (`rain/MatrixGlow.qml`, QtQuick.Effects) that silently turns itself off
+  if the module is missing.
+- Dropped from section 4.3: per-variant Global Theme packages. Picking one in
+  System Settings would change KDE but not the terminal, prompt or login
+  screen, leaving things out of sync; `matrix-rice <color>` is the one switch.
