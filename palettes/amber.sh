@@ -1,0 +1,25 @@
+# shellcheck shell=bash disable=SC2034
+# Matrix Amber: 1980s monochrome monitor, warm and good at night.
+MR_ID=amber
+MR_NAME=Amber
+MR_CMATRIX=yellow
+MR_BG="#0A0602"
+MR_SURFACE="#140C04"
+MR_FG="#FFB000"
+MR_HEAD="#FFF1CC"
+MR_DIM="#AD7A00"
+MR_FAINT="#3D2A00"
+MR_ALERT="#FF4A1C"
+# Windows 95 style 3D bevels and title bars.
+MR_FACE="#1E1406"
+MR_HILITE="#CC8C00"
+MR_LIGHT="#523808"
+MR_SHADOW="#060401"
+MR_DKSHADOW="#000000"
+MR_TITLE="#7A5200"
+MR_TITLE_INACTIVE="#33250F"
+MR_TITLE_INACTIVE_TEXT="#B08A4E"
+MR_ANSI=(
+  "#241606" "#FF4A1C" "#B8E05A" "#FFB000" "#6FA8DC" "#E08AB8" "#7FD8C8" "#FFD98A"
+  "#5C3A0A" "#FF7A52" "#D2F28A" "#FFC94D" "#9CC6EC" "#F0B3D4" "#A8EADF" "#FFF1CC"
+)

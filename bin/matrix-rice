@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# matrix-rice - switch the Matrix rice between colors and options.
+set -euo pipefail
+
+self=$(readlink -f "${BASH_SOURCE[0]}")
+MR_SRC=$(cd "$(dirname "$self")/.." && pwd)
+# shellcheck source=lib/common.sh
+. "$MR_SRC/lib/common.sh"
+# shellcheck source=lib/apply.sh
+. "$MR_SRC/lib/apply.sh"
+
+usage() {
+  cat <<USAGE
+matrix-rice: Matrix look for KDE Plasma
+
+  matrix-rice green | cyan | amber   switch everything to that color
+                     [--no-login]    ...but leave the login screen alone
+  matrix-rice rain on | off          live code rain on or off
+  matrix-rice style 95 | plain       Windows 95 shapes, or plain Breeze shapes
+  matrix-rice taskbar on | off       Windows 95 taskbar, or your old panels back
+  matrix-rice login install | remove Matrix login screen (asks for your password)
+  matrix-rice status                 show current settings
+USAGE
+}
+
+[ "$(id -u)" -ne 0 ] || die "Run matrix-rice as yourself, not as root or with sudo."
+cmd=${1:-}
+case "$cmd" in
+  green|cyan|amber)
+    apply_variant "$cmd" "${2:-}"
+    say "Done. Open a new terminal window to see the new prompt colors." ;;
+  rain)
+    case "${2:-}" in on|off) set_rain "$2" ;; *) die "Use: matrix-rice rain on|off" ;; esac ;;
+  style)
+    case "${2:-}" in
+      95|plain)
+        v=$(state_get COLOR); load_palette "${v:-green}"
+        apply_style "$2"; notify_kde
+        say "Already-open apps pick up the new widget shapes when restarted." ;;
+      *) die "Use: matrix-rice style 95|plain" ;;
+    esac ;;
+  taskbar)
+    case "${2:-}" in on) taskbar_on ;; off) taskbar_off; v=$(state_get COLOR); load_palette "${v:-green}"; apply_wallpaper ;; *) die "Use: matrix-rice taskbar on|off" ;; esac ;;
+  login)
+    case "${2:-}" in
+      install) v=$(state_get COLOR); load_palette "${v:-green}"; login_install ;;
+      remove) login_remove ;;
+      *) die "Use: matrix-rice login install|remove" ;;
+    esac ;;
+  status)
+    printf 'color:   %s\nrain:    %s\nstyle:   %s\ntaskbar: %s\nlogin:   %s\n' \
+      "$(state_get COLOR)" "$(state_get RAIN || true)" "$(state_get STYLE)" \
+      "$(state_get TASKBAR)" "$(state_get LOGIN)" | sed 's/: *$/: -/' ;;
+  help|-h|--help|"") usage ;;
+  *) usage; exit 1 ;;
+esac

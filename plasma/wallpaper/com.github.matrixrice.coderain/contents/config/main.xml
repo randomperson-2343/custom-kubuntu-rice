@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name=""/>
+
+  <group name="General">
+    <!-- Colors are written by `matrix-rice <color>`. Defaults are Green. -->
+    <entry name="Background" type="String"><default>#030A04</default></entry>
+    <entry name="Ink" type="String"><default>#00FF41</default></entry>
+    <entry name="Head" type="String"><default>#D8FFE0</default></entry>
+    <entry name="Dim" type="String"><default>#009A14</default></entry>
+    <entry name="Animated" type="Bool"><default>true</default></entry>
+    <entry name="Glow" type="Bool"><default>true</default></entry>
+    <entry name="Speed" type="Double"><default>1.0</default></entry>
+    <entry name="Density" type="Double"><default>0.75</default></entry>
+    <entry name="GlyphSize" type="Int"><default>18</default></entry>
+    <entry name="Fps" type="Int"><default>30</default></entry>
+  </group>
+</kcfg>

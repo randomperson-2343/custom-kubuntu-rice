@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=Matrix Rice
+Description=Matrix code rain login screen (matrix-rice)
+Author=matrix-rice
+License=GPL-2.0-or-later
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=matrix-rice
+Theme-API=2.0
+QtVersion=6

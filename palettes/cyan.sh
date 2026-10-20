@@ -1,0 +1,25 @@
+# shellcheck shell=bash disable=SC2034
+# Matrix Cyan: cold ice blue, easier on the eyes for long sessions.
+MR_ID=cyan
+MR_NAME=Cyan
+MR_CMATRIX=cyan
+MR_BG="#02080B"
+MR_SURFACE="#061218"
+MR_FG="#00E5FF"
+MR_HEAD="#E0FBFF"
+MR_DIM="#0099A8"
+MR_FAINT="#00363D"
+MR_ALERT="#FF3B6B"
+# Windows 95 style 3D bevels and title bars.
+MR_FACE="#0A1C24"
+MR_HILITE="#00B4C8"
+MR_LIGHT="#0B4452"
+MR_SHADOW="#010507"
+MR_DKSHADOW="#000000"
+MR_TITLE="#006A78"
+MR_TITLE_INACTIVE="#13303A"
+MR_TITLE_INACTIVE_TEXT="#62A4B0"
+MR_ANSI=(
+  "#08202A" "#FF3B6B" "#3BFF9D" "#FFE26B" "#2E8BFF" "#B78CFF" "#00E5FF" "#A6F4FF"
+  "#1A5566" "#FF7097" "#7DFFC0" "#FFF0A6" "#6FB0FF" "#D3B8FF" "#66F0FF" "#E6FDFF"
+)

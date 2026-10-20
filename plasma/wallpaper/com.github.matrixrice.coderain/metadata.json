@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Wallpaper",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "matrix-rice"
+            }
+        ],
+        "Category": "",
+        "Description": "Live Matrix code rain",
+        "Icon": "utilities-terminal",
+        "Id": "com.github.matrixrice.coderain",
+        "License": "GPLv2+",
+        "Name": "Matrix Code Rain",
+        "Version": "1.0"
+    },
+    "Keywords": "matrix;rain;code;animated",
+    "X-KDE-ParentApp": "org.kde.plasmashell"
+}
